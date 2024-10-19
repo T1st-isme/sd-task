@@ -14,13 +14,13 @@ datasource db {
 }
 
 model User {
-    id            String     @id @default(auto()) @map("_id") @db.ObjectId
-    username      String     @unique
-    email         String     @unique
-    password      String
-    userRoles     UserRole[]
-    loginAttempts Int        @default(0)
-    createdAt     DateTime   @default(now())
+    id             String         @id @default(auto()) @map("_id") @db.ObjectId
+    username       String         @unique
+    email          String         @unique
+    password       String
+    userRoles      UserRole[]
+    userActivities UserActivity[]
+    createdAt      DateTime       @default(now())
 }
 
 model Role {
@@ -37,4 +37,24 @@ model UserRole {
     user      User     @relation(fields: [userId], references: [id])
     role      Role     @relation(fields: [roleId], references: [id])
     createdAt DateTime @default(now())
+}
+
+model UserActivity {
+    id        String       @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String?      @db.ObjectId
+    user      User?        @relation(fields: [userId], references: [id])
+    type      ActivityType
+    ip        String?
+    details   String?
+    createdAt DateTime     @default(now())
+}
+
+enum ActivityType {
+    REGISTER
+    FAILED_REGISTER
+    LOGIN
+    LOGOUT
+    PASSWORD_CHANGE
+    PASSWORD_RESET
+    FAILED_LOGIN
 }
