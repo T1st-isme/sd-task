@@ -14,12 +14,13 @@ datasource db {
 }
 
 model User {
-    id        String     @id @default(auto()) @map("_id") @db.ObjectId
-    username  String     @unique
-    email     String     @unique
-    password  String
-    userRoles UserRole[]
-    createdAt DateTime   @default(now())
+    id            String     @id @default(auto()) @map("_id") @db.ObjectId
+    username      String     @unique
+    email         String     @unique
+    password      String
+    userRoles     UserRole[]
+    loginAttempts Int        @default(0)
+    createdAt     DateTime   @default(now())
 }
 
 model Role {

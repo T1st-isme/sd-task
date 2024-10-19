@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-    
+
     async onModuleInit() {
         // Request Timing and Performance Monitoring
         this.$use(async (params, next) => {
@@ -33,30 +33,30 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         });
 
         // Rate limiting
-        const rateLimit = new Map<string, { count: number, lastRequest: number }>();
+        // const rateLimit = new Map<string, { count: number, lastRequest: number }>();
 
-        this.$use(async (params, next) => {
-          const key = `${params.model}-${params.action}`;
+        // this.$use(async (params, next) => {
+        //   const key = `${params.model}-${params.action}`;
 
-          if (!rateLimit.has(key)) {
-            rateLimit.set(key, { count: 1, lastRequest: Date.now() });
-          } else {
-            const entry = rateLimit.get(key);
-            const now = Date.now();
+        //   if (!rateLimit.has(key)) {
+        //     rateLimit.set(key, { count: 1, lastRequest: Date.now() });
+        //   } else {
+        //     const entry = rateLimit.get(key);
+        //     const now = Date.now();
 
-            if (now - entry.lastRequest < 1000) { // Check if last request was within 1 second
-              entry.count++;
+        //     if (now - entry.lastRequest < 1000) { // Check if last request was within 1 second
+        //       entry.count++;
 
-              if (entry.count > 5) { // Limit to 5 requests per second
-                throw new Error('Too many requests');
-              }
-            } else {
-              entry.count = 1;
-              entry.lastRequest = now;
-            }
-          }
-          return next(params);
-        });
+        //       if (entry.count > 5) { // Limit to 5 requests per second
+        //         throw new Error('Too many requests');
+        //       }
+        //     } else {
+        //       entry.count = 1;
+        //       entry.lastRequest = now;
+        //     }
+        //   }
+        //   return next(params);
+        // });
 
         // // Set createdAt field for Employee model
         // this.$use(async (params, next) => {

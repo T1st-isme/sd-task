@@ -1,22 +1,21 @@
+import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './user/user.module';
-
-const jwtSecret = process.env.JWT_SECRET;
+import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     PrismaModule,
     AuthModule,
-    JwtModule.register({
-      secret: jwtSecret,
-      signOptions: { expiresIn: '24h' },
-      global: true,
-    }),
     UserModule,
   ],
   controllers: [AppController],

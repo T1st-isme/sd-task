@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-
+import { Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -23,7 +23,7 @@ export class AuthService {
       },
     });
     return {
-      message: 'User created successfully',
+      message: 'Registration successful',
       user: {
         id: user.id,
         username: user.username,
@@ -32,20 +32,30 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
+  async login(loginDto: LoginDto, res: Response) {
+    const user = await this.prisma.user.findFirst({
       where: {
-        username: loginDto.username,
+        OR: [{ username: loginDto.username }, { email: loginDto.email }],
       },
     });
+
+    //compare password
     const isPasswordValid = await compare(loginDto.password, user.password);
 
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    //create jwt token
     const payload = { sub: user.id, username: user.username, role: user.role };
     const token = this.jwtService.sign(payload);
+
+    //save token in cookie
+    res.cookie('jwt', token, {
+      expires: new Date(
+        Date.now() + Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
+      ),
+    });
 
     return {
       message: 'Login successful',
