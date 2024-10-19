@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -11,24 +6,27 @@ import { LoginDto } from './dto/login.dto';
 import { compare, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ActivityType } from '@prisma/client';
+import { LogActivityService } from 'src/services/log-activity.service';
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly logActivityService: LogActivityService,
   ) {}
 
   async signup(registerDto: RegisterDto, ip: string) {
     //check if user already exists
     const userExists = await this.prisma.user.findFirst({
       where: {
-        OR: [{ username: registerDto.username }, { email: registerDto.email }],
+        email: registerDto.email,
       },
     });
 
     if (userExists) {
-      await this.logActivity(
+      await this.logActivityService.logActivity(
         null,
         ActivityType.FAILED_REGISTER,
         ip,
@@ -60,7 +58,12 @@ export class AuthService {
       });
     }
 
-    await this.logActivity(user.id, ActivityType.REGISTER, ip, 'Registration successful');
+    await this.logActivityService.logActivity(
+      user.id,
+      ActivityType.REGISTER,
+      ip,
+      'Registration successful',
+    );
 
     return {
       message: 'Registration successful',
@@ -73,6 +76,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto, res: Response, ip: string) {
+    //can login with username or email
     const user = await this.prisma.user.findFirst({
       where: {
         OR: [{ username: loginDto.username }, { email: loginDto.email }],
@@ -85,10 +89,8 @@ export class AuthService {
         },
       },
     });
-
-
     if (!user) {
-      await this.logActivity(
+      await this.logActivityService.logActivity(
         null,
         ActivityType.FAILED_LOGIN,
         ip,
@@ -99,9 +101,8 @@ export class AuthService {
 
     //compare password
     const isPasswordValid = await compare(loginDto.password, user.password);
-
     if (!isPasswordValid) {
-      await this.logActivity(
+      await this.logActivityService.logActivity(
         user.id,
         ActivityType.FAILED_LOGIN,
         ip,
@@ -110,12 +111,18 @@ export class AuthService {
       throw new HttpException('Invalid old password', HttpStatus.UNAUTHORIZED);
     }
 
-    await this.logActivity(user.id, ActivityType.LOGIN, ip, 'Login successful');
+    await this.logActivityService.logActivity(
+      user.id,
+      ActivityType.LOGIN,
+      ip,
+      'Login successful',
+    );
 
     //create jwt token
     const payload = {
       sub: user.id,
       username: user.username,
+      email: user.email,
       roles: user.userRoles.map((x) => x.role.name),
     };
     const token = this.jwtService.sign(payload);
@@ -134,19 +141,4 @@ export class AuthService {
     };
   }
 
-  private async logActivity(
-    userId: string | null,
-    type: ActivityType,
-    ip: string,
-    details?: string,
-  ) {
-    await this.prisma.userActivity.create({
-      data: {
-        userId,
-        type,
-        ip,
-        details,
-      },
-    });
-  }
 }

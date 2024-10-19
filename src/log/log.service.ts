@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class LogService {
   constructor(private readonly prisma: PrismaService) {}
+
   async getAllLogs() {
     const logs = await this.prisma.userActivity.findMany({
       select: {

@@ -1,38 +1,39 @@
-import { Controller, Get, Delete, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Post,
+  Body,
+  Req,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-
+import { Request } from 'express';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll() {
-    const users = await this.userService.findAll();
-    return {
-        success: true,
-        data: users
-    };
+  findAll() {
+    return this.userService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.userService.findOne(id);
-    return {
-        success: true,
-        data: user
-    };
+  @Post('request-password-reset')
+  async requestPasswordReset(
+    @Body() resetDto: RequestPasswordResetDto,
+    @Req() req: Request,
+
+  ) {
+    return this.userService.requestPasswordReset(resetDto, req.ip);
   }
 
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const user = await this.userService.remove(id);
-    return {
-        success: true,
-        data: user
-    };
+  @Post('reset-password')
+  async resetPassword(@Body() resetDto: ResetPasswordDto, @Req() req: Request, @Query('token') token: string) {
+    return this.userService.resetPassword(resetDto, req.ip, token);
   }
 }
