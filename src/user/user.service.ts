@@ -18,6 +18,7 @@ export class UserService {
     private readonly logActivityService: LogActivityService,
   ) {}
 
+
   async findAll() {
     const users = await this.prisma.user.findMany();
     return {
