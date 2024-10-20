@@ -24,6 +24,11 @@ export class AuthService {
   ) {}
 
   async signup(registerDto: RegisterDto, ip: string) {
+    // Check if passwords match
+    if (registerDto.password !== registerDto.confirmPassword) {
+      throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
+    }
+
     //check if user already exists
     const userExists = await this.prisma.user.findFirst({
       where: {
@@ -179,7 +184,11 @@ export class AuthService {
     return { secret, qrCodeDataURL };
   }
 
-  async verifyTwoFactorCode(user: any, code: string, ip: string): Promise<boolean> {
+  async verifyTwoFactorCode(
+    user: any,
+    code: string,
+    ip: string,
+  ): Promise<boolean> {
     const isValid = authenticator.verify({
       token: code,
       secret: user.twoFactorSecret,

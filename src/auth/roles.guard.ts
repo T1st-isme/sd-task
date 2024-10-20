@@ -33,6 +33,7 @@ export class RolesGuard implements CanActivate {
 
     const roles = userRoles.map((ur) => ur.role.name);
 
+    // check if user has many roles
     return requiredRoles.some((role) => roles.includes(role));
   }
 }
