@@ -7,6 +7,7 @@ import { hash } from 'bcryptjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -34,10 +35,14 @@ export class UserService {
     return user;
   }
 
-  async requestPasswordReset(
-    resetDto: RequestPasswordResetDto,
-    ip: string,
-  ) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+  }
+
+  async requestPasswordReset(resetDto: RequestPasswordResetDto, ip: string) {
     const user = await this.prisma.user.findUnique({
       where: { email: resetDto.email },
     });
@@ -91,6 +96,12 @@ export class UserService {
     });
 
     if (!user) {
+      await this.logActivityService.logActivity(
+        null,
+        ActivityType.FAILED_LOGIN,
+        ip,
+        'Invalid or expired token',
+      );
       throw new HttpException(
         'Invalid or expired token',
         HttpStatus.BAD_REQUEST,

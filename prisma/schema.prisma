@@ -14,13 +14,15 @@ datasource db {
 }
 
 model User {
-    id             String         @id @default(auto()) @map("_id") @db.ObjectId
-    username       String         @unique
-    email          String         @unique
-    password       String
-    userRoles      UserRole[]
-    userActivities UserActivity[]
-    createdAt      DateTime       @default(now())
+    id               String         @id @default(auto()) @map("_id") @db.ObjectId
+    username         String         @unique
+    email            String         @unique
+    password         String
+    userRoles        UserRole[]
+    userActivities   UserActivity[]
+    twoFactorEnabled Boolean        @default(false)
+    twoFactorSecret  String?
+    createdAt        DateTime       @default(now())
 }
 
 model Role {
@@ -57,4 +59,9 @@ enum ActivityType {
     PASSWORD_CHANGE
     PASSWORD_RESET
     FAILED_LOGIN
+    ENABLE_2FA
+    DISABLE_2FA
+    FAILED_2FA_VERIFICATION
+    SUCCESS_2FA_VERIFICATION
+    UPDATE_USER
 }

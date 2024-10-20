@@ -9,7 +9,6 @@ import { LogModule } from './log/log.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +18,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         transport: {
           host: process.env.SMTP_HOST,
           port: Number(process.env.SMTP_PORT),
-          secure: false, // true for 465, false for other ports
+          secure: false,
           auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,

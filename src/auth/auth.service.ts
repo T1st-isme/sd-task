@@ -1,4 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -7,7 +12,8 @@ import { compare, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ActivityType } from '@prisma/client';
 import { LogActivityService } from 'src/services/log-activity.service';
-
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -99,6 +105,20 @@ export class AuthService {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      if (!loginDto.twoFactorCode)
+        throw new UnauthorizedException('2FA code required');
+      const isTwoFactorValid = await this.verifyTwoFactorCode(
+        user,
+        loginDto.twoFactorCode,
+        ip,
+      );
+      console.log(isTwoFactorValid);
+      if (!isTwoFactorValid)
+        throw new UnauthorizedException('Invalid 2FA code');
+    }
+
     //compare password
     const isPasswordValid = await compare(loginDto.password, user.password);
     if (!isPasswordValid) {
@@ -120,9 +140,10 @@ export class AuthService {
 
     //create jwt token
     const payload = {
-      sub: user.id,
+      id: user.id,
       username: user.username,
       email: user.email,
+      twoFactorEnabled: user.twoFactorEnabled,
       roles: user.userRoles.map((x) => x.role.name),
     };
     const token = this.jwtService.sign(payload);
@@ -141,4 +162,44 @@ export class AuthService {
     };
   }
 
+  async generateTwoFactorSecret(user: any) {
+    if (user.twoFactorEnabled) {
+      throw new Error('2FA is already enabled for this user');
+    }
+    const secret = authenticator.generateSecret();
+    const otpauthUrl = authenticator.keyuri(user.email, 'sd-task', secret);
+
+    // Store the secret in the database
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { twoFactorSecret: secret },
+    });
+
+    const qrCodeDataURL = await toDataURL(otpauthUrl);
+    return { secret, qrCodeDataURL };
+  }
+
+  async verifyTwoFactorCode(user: any, code: string, ip: string): Promise<boolean> {
+    const isValid = authenticator.verify({
+      token: code,
+      secret: user.twoFactorSecret,
+    });
+
+    if (isValid) {
+      await this.logActivityService.logActivity(
+        user.id,
+        ActivityType.SUCCESS_2FA_VERIFICATION,
+        ip,
+        '2FA verification successful',
+      );
+    } else {
+      await this.logActivityService.logActivity(
+        user.id,
+        ActivityType.FAILED_2FA_VERIFICATION,
+        ip,
+        '2FA verification failed',
+      );
+    }
+    return isValid;
+  }
 }
