@@ -20,6 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ActivityType } from '@prisma/client';
 import { LogActivityService } from 'src/services/log-activity.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Roles } from './roles.decorator';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -40,8 +41,8 @@ export class AuthController {
     description: 'User registration data',
     type: RegisterDto,
   })
-  signup(@Body() registerDto: RegisterDto, @Req() req: Request) {
-    return this.authService.signup(registerDto, req.ip);
+  signup(@Body() registerDto: RegisterDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.signup(registerDto, req.ip, res);
   }
 
   @UseGuards(ThrottlerGuard)
@@ -69,23 +70,24 @@ export class AuthController {
   @ApiOperation({ summary: 'Enable two-factor authentication' })
   @ApiResponse({ status: 200, description: '2FA enabled.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async enableTwoFactorAuthentication(@Req() req) {
+  async enableTwoFactorAuthentication(@Req() req, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies['jwt'];
     const user = await this.jwtService.verifyAsync(token);
 
-    const { qrCodeDataURL } =
-      await this.authService.generateTwoFactorSecret(user);
-    return { qrCodeDataURL };
+    const { twoFactorSecret, qrCodeDataURL } =
+      await this.authService.generateTwoFactorSecret(user, res);
+    return { twoFactorSecret, qrCodeDataURL };
   }
 
 
-  
+
   @Post('verify-2fa')
   @UseGuards(JwtAuthGuard)
   async verifyTwoFactor(@Req() req, @Body('code') code: string) {
     //verify token with jwt
     const token = req.cookies['jwt'];
-    const user = await this.jwtService.verifyAsync(token);
+    const decodedUser = await this.jwtService.decode(token);
+    const user = await this.userService.findByEmail(decodedUser.email);
 
     const isValid = await this.authService.verifyTwoFactorCode(
       user,

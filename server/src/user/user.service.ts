@@ -20,7 +20,19 @@ export class UserService {
 
 
   async findAll() {
-    const users = await this.prisma.user.findMany();
+    const users = await this.prisma.user.findMany({
+      include: {
+        userRoles: {
+          select: {
+            role: {
+                select: {
+                    name: true,
+                },
+            },
+          },
+        },
+      },
+    });
     return {
       success: Boolean(users.length),
       data: users,

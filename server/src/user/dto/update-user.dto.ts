@@ -15,8 +15,4 @@ export class UpdateUserDto {
     @IsBoolean()
     @IsOptional()
     twoFactorEnabled: boolean;
-
-    @IsString()
-    @IsOptional()
-    twoFactorSecret?: string;
 }

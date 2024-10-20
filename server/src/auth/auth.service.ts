@@ -23,7 +23,7 @@ export class AuthService {
     private readonly logActivityService: LogActivityService,
   ) {}
 
-  async signup(registerDto: RegisterDto, ip: string) {
+  async signup(registerDto: RegisterDto, ip: string, res: Response) {
     // Check if passwords match
     if (registerDto.password !== registerDto.confirmPassword) {
       throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
@@ -69,6 +69,24 @@ export class AuthService {
       });
     }
 
+    //generate jwt token
+    const payload = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      twoFactorEnabled: false,
+      roles: ['user'],
+    };
+    const token = this.jwtService.sign(payload);
+
+    //save token in cookie
+    res.cookie('jwt', token, {
+      expires: new Date(
+        Date.now() +
+          Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
+      ),
+    });
+
     await this.logActivityService.logActivity(
       user.id,
       ActivityType.REGISTER,
@@ -82,6 +100,7 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
+        roles: payload.roles,
       },
     };
   }
@@ -155,6 +174,7 @@ export class AuthService {
       twoFactorSecret: user.twoFactorSecret,
       roles: user.userRoles.map((x) => x.role.name),
     };
+
     const token = this.jwtService.sign(payload);
 
     //save token in cookie
@@ -171,13 +191,9 @@ export class AuthService {
     };
   }
 
-  async loginWithTwoFactor(token: string) {
-    const decoded = this.jwtService.verify(token);
-    return decoded;
-  }
-
-  async generateTwoFactorSecret(user: any) {
-    if (user.twoFactorEnabled) {
+  async generateTwoFactorSecret(user: any, res: Response) {
+    console.log('user', user.twoFactorEnabled);
+    if (user.twoFactorEnabled == true) {
       throw new Error('2FA is already enabled for this user');
     }
     const secret = authenticator.generateSecret();
@@ -190,7 +206,7 @@ export class AuthService {
     });
 
     const qrCodeDataURL = await toDataURL(otpauthUrl);
-    return { secret, qrCodeDataURL };
+    return { twoFactorSecret: secret, qrCodeDataURL };
   }
 
   async verifyTwoFactorCode(
