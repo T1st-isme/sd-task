@@ -19,7 +19,10 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ActivityType } from '@prisma/client';
 import { LogActivityService } from 'src/services/log-activity.service';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -29,6 +32,14 @@ export class AuthController {
   ) {}
 
   @Post('signup')
+  @ApiOperation({ summary: 'User registration' })
+  @ApiResponse({ status: 201, description: 'User successfully registered.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiConsumes('application/x-www-form-urlencoded')
+  @ApiBody({
+    description: 'User registration data',
+    type: RegisterDto,
+  })
   signup(@Body() registerDto: RegisterDto, @Req() req: Request) {
     return this.authService.signup(registerDto, req.ip);
   }
@@ -36,6 +47,14 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
+  @ApiOperation({ summary: 'User login' })
+  @ApiResponse({ status: 200, description: 'User successfully logged in.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiConsumes('application/x-www-form-urlencoded')
+  @ApiBody({
+    description: 'User login data',
+    type: LoginDto,
+  })
   login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -46,14 +65,21 @@ export class AuthController {
 
   @Post('enable-2fa')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Enable two-factor authentication' })
+  @ApiResponse({ status: 200, description: '2FA enabled.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async enableTwoFactorAuthentication(@Req() req) {
     const token = req.cookies['jwt'];
     const user = await this.jwtService.verifyAsync(token);
+
     const { qrCodeDataURL } =
       await this.authService.generateTwoFactorSecret(user);
     return { qrCodeDataURL };
   }
 
+
+  
   @Post('verify-2fa')
   @UseGuards(JwtAuthGuard)
   async verifyTwoFactor(@Req() req, @Body('code') code: string) {
@@ -90,4 +116,6 @@ export class AuthController {
       throw new UnauthorizedException('Invalid authentication code');
     }
   }
+
+
 }

@@ -90,7 +90,7 @@ export class AuthService {
     //can login with username or email
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [{ username: loginDto.username }, { email: loginDto.email }],
+        OR: [{ username: loginDto.identifier }, { email: loginDto.identifier }],
       },
       include: {
         userRoles: {
@@ -112,13 +112,16 @@ export class AuthService {
 
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
-      if (!loginDto.twoFactorCode)
+      if (!loginDto.twoFactorCode) {
         throw new UnauthorizedException('2FA code required');
+      }
+
       const isTwoFactorValid = await this.verifyTwoFactorCode(
         user,
         loginDto.twoFactorCode,
         ip,
       );
+
       console.log(isTwoFactorValid);
       if (!isTwoFactorValid)
         throw new UnauthorizedException('Invalid 2FA code');
@@ -149,6 +152,7 @@ export class AuthService {
       username: user.username,
       email: user.email,
       twoFactorEnabled: user.twoFactorEnabled,
+      twoFactorSecret: user.twoFactorSecret,
       roles: user.userRoles.map((x) => x.role.name),
     };
     const token = this.jwtService.sign(payload);
@@ -165,6 +169,11 @@ export class AuthService {
       message: 'Login successful',
       token,
     };
+  }
+
+  async loginWithTwoFactor(token: string) {
+    const decoded = this.jwtService.verify(token);
+    return decoded;
   }
 
   async generateTwoFactorSecret(user: any) {
