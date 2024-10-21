@@ -99,6 +99,20 @@ SMTP_USER=
 SMTP_PASS=
 ```
 
+## Sample ENV
+
+```bash
+DATABASE_URL="mongodb://localhost:27017/nest-auth?directConnection=true"
+JWT_SECRET=qmiwoeqiowjeiqwj
+JWT_PASSWORD_SECRET=123123123
+COOKIE_EXPIRES_TIME=1
+FRONTEND_URL=http://localhost:3001
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=trientrung102@gmail.com
+SMTP_PASS=kmyx lfdx yxrj nhsh
+```
+
 ## Getting Started
 
 To get started with this project, clone the repository and follow the setup instructions in the respective `README.md` files located in the `client` and `server` directories.
