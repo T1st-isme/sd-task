@@ -85,6 +85,20 @@ The server-side is powered by [NestJS](https://nestjs.com), a progressive Node.j
 
 The application uses Prisma as an ORM to interact with a MongoDB database, providing a type-safe database client and migrations.
 
+## Environment Variables
+
+```bash
+DATABASE_URL=
+JWT_SECRET=
+JWT_PASSWORD_SECRET=
+COOKIE_EXPIRES_TIME=
+FRONTEND_URL=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+```
+
 ## Getting Started
 
 To get started with this project, clone the repository and follow the setup instructions in the respective `README.md` files located in the `client` and `server` directories.
