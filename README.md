@@ -59,6 +59,18 @@ yarn dev
 bun dev
 ```
 
+### Prisma
+
+```bash
+npx prisma generate
+```
+
+and
+
+```bash
+npx prisma db push
+```
+
 ## Client-Side
 
 The client-side of this application is built using [Next.js](https://nextjs.org), a React framework that enables server-side rendering and static site generation. It is bootstrapped with `create-next-app` and utilizes a variety of UI components and libraries to enhance the user experience.
