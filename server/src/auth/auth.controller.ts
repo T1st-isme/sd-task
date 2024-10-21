@@ -21,6 +21,7 @@ import { ActivityType } from '@prisma/client';
 import { LogActivityService } from 'src/services/log-activity.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -65,7 +66,8 @@ export class AuthController {
   }
 
   @Post('enable-2fa')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Enable two-factor authentication' })
   @ApiResponse({ status: 200, description: '2FA enabled.' })
@@ -82,7 +84,8 @@ export class AuthController {
 
 
   @Post('verify-2fa')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
   async verifyTwoFactor(@Req() req, @Body('code') code: string) {
     //verify token with jwt
     const token = req.cookies['jwt'];

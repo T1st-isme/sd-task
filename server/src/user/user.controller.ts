@@ -43,6 +43,8 @@ export class UserController {
     description: 'Password reset request data',
     type: RequestPasswordResetDto,
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
   @Post('request-password-reset')
   async requestPasswordReset(
     @Body() resetDto: RequestPasswordResetDto,
@@ -60,6 +62,8 @@ export class UserController {
     description: 'Password reset data',
     type: ResetPasswordDto,
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
   @Post('reset-password')
   async resetPassword(@Body() resetDto: ResetPasswordDto, @Req() req: Request, @Query('token') token: string) {
     return this.userService.resetPassword(resetDto, req.ip, token);
