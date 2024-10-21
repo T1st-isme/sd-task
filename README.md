@@ -37,8 +37,10 @@ yarn start:dev
 
 ### Go to the client directory
 
+Open new terminal:
+
 ```bash
-cd ..\client\
+cd client
 ```
 
 ### Install dependencies
@@ -129,4 +131,4 @@ Demo: https://sd-task-nine.vercel.app
 - This project is not for commercial use.
 - I just deploy the FE on Vercel, BE need to run on local.
 
-We hope you find this project useful and welcome any feedback or contributions!
+I hope you find this project useful and welcome any feedback or contributions!
