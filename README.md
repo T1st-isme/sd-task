@@ -37,8 +37,10 @@ yarn start:dev
 
 ### Go to the client directory
 
+Open new terminal:
+
 ```bash
-cd ..\client\
+cd client
 ```
 
 ### Install dependencies
