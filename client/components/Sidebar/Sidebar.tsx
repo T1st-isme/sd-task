@@ -1,13 +1,7 @@
 "use client";
 
 import { useAuth } from "@/app/hooks/useAuth";
-import {
-    Building2Icon,
-    CalendarDaysIcon,
-    DollarSignIcon,
-    HomeIcon,
-    UsersIcon,
-} from "lucide-react";
+import { HomeIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 

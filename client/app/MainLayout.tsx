@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import NavbarComponent from "@/components/Navbar/Navbar";
 import SidebarComponent from "@/components/Sidebar/Sidebar";
-import { useAuthStore } from "./states/useAuthStore";
 import Breadcrumb from "@/components/ui/breadcrumb";
 
 interface BreadcrumbItem {

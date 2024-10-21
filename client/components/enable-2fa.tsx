@@ -65,7 +65,7 @@ export default function EnableTwoFactorAuth() {
                         <>
                             <div className="flex flex-col items-center space-y-4">
                                 <Image
-                                    src={qrCodeDataURL}
+                                    src={qrCodeDataURL || ""}
                                     alt="Scan this QR code with your authenticator app"
                                     width={200}
                                     height={200}

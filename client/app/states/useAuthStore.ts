@@ -79,9 +79,9 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
             console.log("response", response);
             set({ user: response.user, loading: false, message: response.message });
-        } catch (error: any) {
+        } catch (error: unknown) {
             set({
-                error: error.response?.data?.message || "Registration failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }
@@ -116,9 +116,9 @@ export const useAuthStore = create<AuthState>((set) => ({
                     message: response.message,
                 });
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             set({
-                error: error.response?.data?.message || "Login failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }
@@ -129,9 +129,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             await forgotPassword(email);
             set({ loading: false, message: "Email sent" });
-        } catch (error: any) {
+        } catch (error: unknown) {
             set({
-                error: error.response?.message || "Forgot password failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }
@@ -142,9 +142,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             await resetPassword(token, newPassword);
             set({ loading: false, message: "Password reset successful" });
-        } catch (error: any) {
+            } catch (error: unknown) {
             set({
-                error: error.response?.data?.message || "Reset password failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }
@@ -199,9 +199,9 @@ export const useAuthStore = create<AuthState>((set) => ({
                 loading: false,
                 message: "2FA enabled",
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             set({
-                error: error.response?.data?.message || "Enable 2FA failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }
@@ -212,9 +212,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             await verify2FA(code);
             set({ loading: false, message: "2FA verified" });
-        } catch (error: any) {
+        } catch (error: unknown) {
             set({
-                error: error.response?.data?.message || "Verify 2FA failed",
+                error: error instanceof Error ? error.message : "Unknown error",
                 loading: false,
             });
         }

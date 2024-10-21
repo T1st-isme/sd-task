@@ -21,8 +21,10 @@ export const useUserStore = create<UserStore>((set) => ({
         try {
             const response = await getUsers();
             set({ users: response.data });
-        } catch (error: any) {
-            set({ error: error.message });
+        } catch (error: unknown) {
+            set({
+                error: error instanceof Error ? error.message : "Unknown error",
+            });
         } finally {
             set({ loading: false });
         }
