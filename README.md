@@ -106,6 +106,13 @@ To get started with this project, clone the repository and follow the setup inst
 ## Deployment
 
 I have deployed the project on Vercel.
-Demo: https://sd-task.vercel.app/
+Demo: https://sd-task-nine.vercel.app
+
+
+## Note
+
+- This project is only for educational purposes.
+- This project is not for commercial use.
+- I just deploy the FE on Vercel, BE need to run on local.
 
 We hope you find this project useful and welcome any feedback or contributions!
