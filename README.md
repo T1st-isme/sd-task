@@ -59,7 +59,7 @@ yarn dev
 bun dev
 ```
 
-### Prisma
+### Prisma for the Backend (server)
 
 ```bash
 npx prisma generate
