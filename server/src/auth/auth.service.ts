@@ -85,6 +85,8 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
+      httpOnly: true,
+      secure: true,
       sameSite: 'none',
     });
 
@@ -184,6 +186,9 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
 
     return {
