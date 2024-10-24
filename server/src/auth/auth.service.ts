@@ -85,9 +85,7 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      domain: "https://sd-task-nine.vercel.app",
     });
 
     await this.logActivityService.logActivity(
@@ -186,9 +184,7 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      domain: "https://sd-task-nine.vercel.app",
     });
 
     return {
