@@ -6,7 +6,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtModule } from '@nestjs/jwt';
 import { LogActivityService } from '../services/log-activity.service';
-    
+
 @Module({
   imports: [
     JwtModule.register({
