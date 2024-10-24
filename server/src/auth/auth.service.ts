@@ -85,6 +85,7 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
+      sameSite: 'lax',
     });
 
     await this.logActivityService.logActivity(
@@ -183,6 +184,7 @@ export class AuthService {
         Date.now() +
           Number(process.env.COOKIE_EXPIRES_TIME) * 24 * 60 * 60 * 1000,
       ),
+      sameSite: 'lax',
     });
 
     return {
